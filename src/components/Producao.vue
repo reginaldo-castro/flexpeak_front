@@ -42,6 +42,15 @@
         </div>
     </section>
 
+    <section class="json-container bg-light">
+        <div class="container"> 
+            <p>
+                <b> Quantidade de Perfumes Fabricados: </b>{{this.qtdprod}} <br>
+                <b> Fragrância mais usadas: </b>{{this.fragUsada}}
+            </p>
+        </div>        
+    </section>
+
 
     <div class="modal fade" id="CadProducao" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" ref="CadProducao">
         <div class="modal-dialog">
@@ -72,13 +81,13 @@
                     <p>
                         <input placeholder="Fragrancia " type="number" name="name" v-model="producao.fragrancia_qtd" class="form-control" required/>
                     </p>
-                                        
+
                     <p>
-                    <select v-model="producao.id_fragrancia">
-                        <option v-for="estoque in estoques" :key="estoque.id" :value="estoque.id">
-                            {{ estoque.descricao }}
-                        </option>
-                    </select>
+                        <select v-model="producao.id_fragrancia">
+                            <option v-for="ingrediente in ingredientes" :key="ingrediente.id" :value="ingrediente.id">
+                                {{ ingrediente.descricao }}
+                            </option>
+                        </select>
                     </p>
                     
                 </div>
@@ -90,7 +99,6 @@
             </div>
         </div>
     </div>
-
              
 </template>
 
@@ -105,6 +113,8 @@
         data() {
             return {
                 producoes: [],
+                qtdprod: this.qtdProduzida(),
+                fragUsada: this.fraMaisUsada(),
                 producao: {
                     'id': '',
                     'descricao': '',
@@ -147,13 +157,31 @@
             },*/
 
             async getAllIngredientes() {
-                Estoque.getAllIngredientes().then(res => {
+               
+                await Estoque.getAllIngredientes().then(res => {
                     this.ingredientes = res.data
                 }, (error) => {
                     this.message.class = 'alert-danger'
                     this.message.mensagem = 'Erro de conectar com o servidor, por favor tente mais tarde!'
                 })
+
             },
+                
+              qtdProduzida(){
+                Producao.getAllProducao().then(res =>{
+                    this.qtdprod = res.data.length; 
+                    return this.qtdprod    
+                })
+            },
+            fraMaisUsada(){
+                Producao.getAllProducao().then(res =>{
+                    this.fragUsa = res.data;
+                    let produfra = this.fragUsa.filter((frag, index, array) => frag.id_fragrancia > 2);
+                    return produfra
+                })
+            },        
+
+
 
             async actionForm(){
                 
@@ -165,6 +193,8 @@
                 }
                 await this.hideModal('CadProducao')
                 await this.getAllProducao()
+                await this.qtdProduzida()
+                await this.fraMaisUsada()
                 
             },
 
@@ -176,6 +206,7 @@
                     this.message.class = 'alert-danger'
                     this.message.mensagem = 'Erro de conectar com o servidor, por favor tente mais tarde!'
                 })
+                
             },
 
             /*async updatePerfume() {
@@ -215,7 +246,7 @@
             openModal(idModal) {
                 this.producoes = {}
                 //this.getAllPerfumes()
-                this.getAllIngredientes()
+                /*await*/ this.getAllIngredientes()
                 $(`#${idModal}`).modal('show')
                 
             },
@@ -231,6 +262,8 @@
                 this.openModal('deletePerfume')
             }*/
         }
+
+
     }   
 
 </script>
